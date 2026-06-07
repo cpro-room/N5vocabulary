@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>N5れんしゅう①</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: sans-serif;
+    background: #f7f7f7;
+    color: #222;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  #quizArea {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  #questionNumber {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #555;
+  }
+
+  #questionBox {
+    font-size: 1.8rem;
+    line-height: 1.8;
+    background: white;
+    padding: 24px 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  #optionsBox {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    width: 100%;
+    padding: 18px 12px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    cursor: pointer;
+  }
+
+  .correct { font-size: 3rem; color: red; font-weight: bold; }
+  .wrong { font-size: 3rem; color: blue; font-weight: bold; }
+
+  #judge {
+    height: 70px;
+    margin-top: 18px;
+  }
+
+  #result {
+    margin-top: 30px;
+    text-align: left;
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  #resultTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #resultTable td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.05rem;
+  }
+
+  .markCol {
+    width: 50px;
+    font-weight: bold;
+    font-size: 1.3rem;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>N5れんしゅう①</h1>
+
+<div id="quizArea">
+  <div id="questionNumber"></div>
+  <div id="questionBox"></div>
+  <div id="optionsBox"></div>
+  <div id="judge"></div>
+  <div id="result"></div>
+</div>
+
+<script>
+
+// ===== 問題 =====
+const questions = [
+  { sentence: "１かげつに １（　　）うちへ かえります。", answer: "かい", options: ["がつ", "じかん", "がい", "かい"] },
+  { sentence: "トイレは 2（　　）です。", answer: "かい", options: ["かい", "がわ", "がい", "キログラム"] },
+  { sentence: "つくえの うえに りんごが （　　） あります。", answer: "むっつ", options: ["とおつ", "むっつ", "ろっつ", "はっつ"] },
+  { sentence: "１ねんに 12（　　） ほんを よみます。", answer: "さつ", options: ["ほん", "こ", "さつ", "がつ"] },
+  { sentence: "こうじょうで まいにち １0０0（　　） エアコンを つくっています。", answer: "だい", options: ["えん", "ほん", "だい", "にち"] },
+  { sentence: "このきょうしつに 11（　　） がくせいが います。", answer: "にん", options: ["ひと", "にん", "こ", "がつ"] },
+  { sentence: "コーヒーを もう１（　　） ください。", answer: "ぱい", options: ["はい", "きっさてん", "ぱい", "カフェ"] },
+  { sentence: "きのう シャツを 3（　　） かいました。", answer: "まい", options: ["ほん", "つ", "こ", "まい"] },
+  { sentence: "かれは ラーメンを （　　）います。", answer: "たべて", options: ["たべて", "のんで", "すって", "かけて"] },
+  { sentence: "なつやすみに うみへ （　　） です。", answer: "いきたい", options: ["のりたい", "いきたい", "のぼりたい", "およぎたい"] },
+  { sentence: "スーパーで ぎゅうにゅうを（　　）。", answer: "かいました", options: ["はらいました", "かいました", "すいました", "かけました"] },
+  { sentence: "わたしは おんがくを （　　） ことが すきです。", answer: "きく", options: ["きいた", "きく", "きる", "きき"] },
+  { sentence: "としょかんで ほんを （　　）。", answer: "かりました", options: ["かりました", "かいました", "しました", "あげました"] },
+  { sentence: "わたしは カメラで しゃしんを （　　）。", answer: "とります", options: ["します", "かいます", "とります", "かけます"] },
+  { sentence: "（　　） に ゆきが ふります。", answer: "ふゆ", options: ["はる", "あき", "ふゆ", "なつ"] },
+  { sentence: "（　　）で ふくを かいました。", answer: "デパート", options: ["デパート", "イーメール", "レストラン", "ぎんこう"] },
+  { sentence: "あたまが いたいですから （　　） へ いきます。", answer: "びょういん", options: ["びょういん", "びよういん", "くすり", "きっさてん"] },
+  { sentence: "こどもたちが こうえんで （　　）。", answer: "あそんでいます", options: ["すんでいます", "あびています", "おしえています", "あそんでいます"] },
+  { sentence: "かれは にほんに （　　）。", answer: "すんでいます", options: ["すわっています", "すんでいます", "いています", "あっています"] },
+  { sentence: "まいばん テレビを （　　）。", answer: "みます", options: ["します", "たべます", "かいます", "みます"] },
+];
+
+// ===== 状態 =====
+let current = 0;
+let score = 0;
+let answering = false;
+let answerLog = [];
+let quizList = [];
+
+// ===== 開始 =====
+startGame();
+
+function startGame() {
+  quizList = shuffle([...questions]);
+  showQuestion();
+}
+
+// ===== 問題表示 =====
+function showQuestion() {
+  const q = quizList[current];
+
+  if (!q) {
+    finishQuiz();
+    return;
+  }
+
+  document.getElementById("questionNumber").textContent =
+    `もんだい ${current + 1}`;
+
+  document.getElementById("questionBox").textContent =
+    q.sentence;
+
+  document.getElementById("judge").innerHTML = "";
+
+  const optionsBox = document.getElementById("optionsBox");
+  optionsBox.innerHTML = "";
+
+  const options = q.options || [];
+
+  shuffle([...options]).forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(opt);
+    optionsBox.appendChild(btn);
+  });
+}
+
+// ===== 回答チェック =====
+function checkAnswer(choice) {
+  if (answering) return;
+  answering = true;
+
+  const q = quizList[current];
+  const judgeBox = document.getElementById("judge");
+
+  const correct = (choice === q.answer);
+
+  if (correct) {
+    score++;
+    judgeBox.innerHTML = "<span class='correct'>○</span>";
+  } else {
+    judgeBox.innerHTML = "<span class='wrong'>×</span>";
+  }
+
+  answerLog.push({
+    question: q.sentence,
+    answer: q.answer,
+    correct: correct
+  });
+
+  setTimeout(() => {
+    current++;
+    answering = false;
+    showQuestion();
+  }, 600);
+}
+
+// ===== 終了 =====
+function finishQuiz() {
+  document.getElementById("questionNumber").textContent = "";
+  document.getElementById("questionBox").innerHTML =
+    `おわり！<br><br>${score} / ${quizList.length} てん`;
+
+  document.getElementById("optionsBox").innerHTML = "";
+  document.getElementById("judge").innerHTML = "";
+
+  let html = `<h3>こたえ</h3><table id="resultTable">`;
+
+  answerLog.forEach(log => {
+
+    const mark = log.correct ? "○" : "×";
+
+    const text = log.question.replace(
+      "（　　）",
+      `<b style="color:red;">${log.answer}</b>`
+    );
+
+    html += `
+      <tr>
+        <td class="markCol">${mark}</td>
+        <td>${text}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  document.getElementById("result").innerHTML = html;
+}
+
+// ===== シャッフル =====
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+</script>
+
+</body>
+</html>
