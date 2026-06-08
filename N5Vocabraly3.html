@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>N5れんしゅう③</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: sans-serif;
+    background: #f7f7f7;
+    color: #222;
+    text-align: center;
+  }
+
+  h1 { font-size: 1.8rem; margin-bottom: 20px; }
+
+  #quizArea { max-width: 500px; margin: 0 auto; }
+
+  #questionNumber {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #555;
+  }
+
+  #questionBox {
+    font-size: 1.8rem;
+    line-height: 1.8;
+    background: white;
+    padding: 24px 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  #optionsBox {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    width: 100%;
+    padding: 18px 12px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    cursor: pointer;
+  }
+
+  .correct { font-size: 3rem; color: red; font-weight: bold; }
+  .wrong { font-size: 3rem; color: blue; font-weight: bold; }
+
+  #result {
+    margin-top: 30px;
+    text-align: left;
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  #retryBtn {
+    margin-top: 15px;
+    padding: 12px;
+    width: 100%;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 10px;
+    background: #ffcc00;
+    cursor: pointer;
+  }
+
+  #resultTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  #resultTable td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.05rem;
+  }
+
+  .markCol {
+    width: 50px;
+    font-weight: bold;
+    font-size: 1.3rem;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>N5れんしゅう③</h1>
+
+<div id="quizArea">
+  <div id="questionNumber"></div>
+  <div id="questionBox"></div>
+  <div id="optionsBox"></div>
+  <div id="judge"></div>
+  <div id="result"></div>
+</div>
+
+<script>
+
+// ===== 20問 =====
+const questions = [
+  { sentence: "（　　）で 6かいへ いきます。", answer: "エレベーター", options: ["エレベーター", "トイレ", "ニュース", "ティッシュ"] },
+  { sentence: "ほんを わすれました。（　　） ください。", answer: "かして", options: ["かえして", "もらって", "はらって", "かして"] },
+  { sentence: "まいあさ 7じに （　　）。", answer: "おきる", options: ["おきた", "おきる", "おそい", "はやい"] },
+  { sentence: "まいばん 9じごろ おふろに （　　）。", answer: "はいります", options: ["はいります", "あびます", "およぎます", "のります"] },
+  { sentence: "このりょうりは あじが （　　）です。", answer: "うすい", options: ["つよい", "すくない", "うすい", "こわい"] },
+  { sentence: "カレンさんは （　　）が ながくて、めが おおきいです。", answer: "かみ", options: ["かみ", "せ", "きれい", "はな"] },
+  { sentence: "ほっかいどうは にほんの （　　）のほうに あります。", answer: "きた", options: ["きた", "みなみ", "ひがし", "にし"] },
+  { sentence: "でんしゃに のるとき （　　）が いります。", answer: "きっぷ", options: ["きっぷ", "きって", "てがみ", "えき"] },
+  { sentence: "かぜを ひいたので （　　）が ほしいです。", answer: "くすり", options: ["プレゼント", "いしゃ", "びょういん", "くすり"] },
+  { sentence: "にほんごの （　　）は すいようびの ごご2じからです。", answer: "クラス", options: ["せんせい", "がくせい", "クラス", "へや"] },
+  { sentence: "かようびの まえは （　　） です。", answer: "げつようび", options: ["げつようび", "すいようび", "どようび", "もくようび"] },
+  { sentence: "コーヒーに （　　）と ミルクを いれます。", answer: "さとう", options: ["さとう", "しお", "こしょう", "ぎゅうにゅう"] },
+  { sentence: "「 （　　）は なんですか？」「かいしゃいんです。」", answer: "しごと", options: ["おとし", "おくに", "しゅみ", "しごと"] },
+  { sentence: "（　　）が あったら、てをあげてください。", answer: "しつもん", options: ["なに", "しつもん", "こたえ", "あし"] },
+  { sentence: "このりょうりは （　　）ないです 。", answer: "からく", options: ["からいじゃ", "からくて", "からく", "からい"] },
+  { sentence: "かいぎの ひは しろい （　　）を きてください。", answer: "シャツ", options: ["ズボン", "くつ", "パンツ", "シャツ"] },
+  { sentence: "レストランが たくさんあります。（　　）みせへ いきたいですか。", answer: "どの", options: ["どれ", "なん", "どっち", "どの"] },
+  { sentence: "ひるやすみに （　　）で ランチを たべます。", answer: "しょくどう", options: ["しょくどう", "スーパー", "フロント", "トイレ"] },
+  { sentence: "ぎんこうは ごご３じ （　　） です。", answer: "まで", options: ["はん", "に", "から", "まで"] },
+  { sentence: "タバコを （　　）と からだに わるいです。", answer: "すう", options: ["たべる", "のむ", "けむり", "すう"] },
+];
+
+// ===== 状態 =====
+let quizList = [];
+let current = 0;
+let answering = false;
+let answerLog = [];
+let wrongList = [];
+
+// ===== 開始 =====
+startQuiz(questions);
+
+// ===== 共通開始 =====
+function startQuiz(list) {
+  quizList = shuffle([...list]);
+  current = 0;
+  answerLog = [];
+  wrongList = [];
+  document.getElementById("result").innerHTML = "";
+  showQuestion();
+}
+
+// ===== 問題表示 =====
+function showQuestion() {
+  const q = quizList[current];
+
+  if (!q) {
+    finishQuiz();
+    return;
+  }
+
+  document.getElementById("questionNumber").textContent =
+    `もんだい ${current + 1} / ${quizList.length}`;
+
+  document.getElementById("questionBox").textContent = q.sentence;
+  document.getElementById("judge").innerHTML = "";
+
+  const box = document.getElementById("optionsBox");
+  box.innerHTML = "";
+
+  shuffle([...q.options]).forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(opt);
+    box.appendChild(btn);
+  });
+}
+
+// ===== 回答 =====
+function checkAnswer(choice) {
+  if (answering) return;
+  answering = true;
+
+  const q = quizList[current];
+  const correct = (choice === q.answer);
+
+  document.getElementById("judge").innerHTML =
+    correct ? "<span class='correct'>○</span>" : "<span class='wrong'>×</span>";
+
+  answerLog.push({
+    sentence: q.sentence,
+    answer: q.answer,
+    correct
+  });
+
+  if (!correct) {
+    wrongList.push(q);
+  }
+
+  setTimeout(() => {
+    current++;
+    answering = false;
+    showQuestion();
+  }, 500);
+}
+
+// ===== 終了画面 =====
+function finishQuiz() {
+
+  const correctCount = answerLog.filter(a => a.correct).length;
+
+  document.getElementById("questionNumber").textContent = "";
+  document.getElementById("questionBox").innerHTML =
+    `おわり！<br><br>${correctCount} / ${quizList.length} てん`;
+
+  document.getElementById("optionsBox").innerHTML = "";
+  document.getElementById("judge").innerHTML = "";
+
+  let html = `<h3>こたえ</h3><table id="resultTable">`;
+
+  answerLog.forEach(log => {
+    const mark = log.correct ? "○" : "×";
+    html += `
+      <tr>
+        <td class="markCol">${mark}</td>
+        <td>${log.sentence.replace("（　　）", `<b style="color:red">${log.answer}</b>`)}</td>
+      </tr>
+    `;
+  });
+
+  html += "</table>";
+
+  if (wrongList.length > 0) {
+    html += `<button id="retryBtn" onclick="retryWrong()">まちがえた もんだいを もういちど</button>`;
+  }
+
+  document.getElementById("result").innerHTML = html;
+}
+
+// ===== やり直し =====
+function retryWrong() {
+  startQuiz(wrongList);
+}
+
+// ===== シャッフル =====
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+</script>
+
+</body>
+</html>
